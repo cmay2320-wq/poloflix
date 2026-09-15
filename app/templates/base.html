@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Poloflix{% endblock %}</title>
+  <meta name="theme-color" content="#0a0e16">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><circle cx=%2216%22 cy=%2216%22 r=%2216%22 fill=%22%231f6feb%22/><path d=%22M12 9l12 7-12 7z%22 fill=%22white%22/></svg>">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+  <header class="navbar">
+    <div class="navbar__inner">
+      <a class="brand" href="{{ url_for('home.index') }}">
+        <svg class="brand__mark" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#1f6feb"/><path d="M12 9l12 7-12 7z" fill="white"/></svg>
+        <span>Poloflix</span>
+      </a>
+
+      <nav class="navbar__links">
+        <a href="{{ url_for('home.index') }}" class="{{ 'is-active' if request.endpoint == 'home.index' }}">Home</a>
+        <a href="{{ url_for('catalog.shows') }}" class="{{ 'is-active' if request.endpoint == 'catalog.shows' }}">TV Shows</a>
+        <a href="{{ url_for('catalog.movies') }}" class="{{ 'is-active' if request.endpoint == 'catalog.movies' }}">Movies</a>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('lists.my_list') }}" class="{{ 'is-active' if request.endpoint == 'lists.my_list' }}">My List</a>
+        {% endif %}
+      </nav>
+
+      <form class="navbar__search" action="{{ url_for('search.search') }}" method="get" id="searchForm" autocomplete="off">
+        <svg viewBox="0 0 24 24" class="icon"><path fill="currentColor" d="M21 21l-4.35-4.35m1.35-5.15a7 7 0 1 1-14 0 7 7 0 0 1 14 0z" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+        <input type="text" name="q" id="searchInput" placeholder="Search for movies, shows..." value="{{ request.args.get('q', '') }}">
+        <div id="searchSuggestions" class="search-suggestions"></div>
+      </form>
+
+      <div class="navbar__actions">
+        {% if current_user.is_authenticated %}
+          <a class="icon-btn" href="{{ url_for('requests.index') }}" title="Request a movie">
+            <svg viewBox="0 0 24 24" class="icon"><path fill="currentColor" d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </a>
+          <div class="notif-wrap">
+            <button class="icon-btn" id="notifBtn" type="button" title="Notifications">
+              <svg viewBox="0 0 24 24" class="icon"><path fill="currentColor" d="M12 22a2.2 2.2 0 0 0 2.2-2.2H9.8A2.2 2.2 0 0 0 12 22zm7-6.2V11a7 7 0 0 0-5.6-6.86V3a1.4 1.4 0 1 0-2.8 0v1.14A7 7 0 0 0 5 11v4.8L3 17.8V19h18v-1.2z"/></svg>
+              {% if unread_notification_count %}<span class="badge">{{ unread_notification_count }}</span>{% endif %}
+            </button>
+          </div>
+          <a class="avatar" href="{{ url_for('account.index') }}">{{ current_user.full_name[:1]|upper if current_user.full_name else current_user.username[:2]|upper }}</a>
+        {% else %}
+          <a class="btn btn--ghost" href="{{ url_for('auth.login') }}">Sign in</a>
+          <a class="btn btn--primary" href="{{ url_for('auth.register') }}">Join Now</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <div class="toast-stack" id="toastStack">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="toast toast--{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+  </div>
+
+  <main class="page">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="brand brand--footer">
+        <svg class="brand__mark" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#1f6feb"/><path d="M12 9l12 7-12 7z" fill="white"/></svg>
+        <span>Poloflix</span>
+      </div>
+      <p class="footer__note">Only upload and stream media you have the rights to distribute.</p>
+      <div class="footer__links">
+        <a href="{{ url_for('requests.index') if current_user.is_authenticated else url_for('auth.login') }}">Request a title</a>
+        <span>&middot;</span>
+        <a href="#">Help Center</a>
+        <span>&middot;</span>
+        <a href="#">Terms</a>
+      </div>
+    </div>
+  </footer>
+
+  {% if current_user.is_authenticated %}
+  <nav class="mobile-nav">
+    <a href="{{ url_for('home.index') }}" class="{{ 'is-active' if request.endpoint == 'home.index' }}">
+      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 3l9 8h-3v9h-5v-6H11v6H6v-9H3z"/></svg><span>Home</span>
+    </a>
+    <a href="{{ url_for('catalog.shows') }}" class="{{ 'is-active' if request.endpoint == 'catalog.shows' }}">
+      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 5h16v11H4zM2 19h20v1H2z"/></svg><span>TV Shows</span>
+    </a>
+    <a href="{{ url_for('catalog.movies') }}" class="{{ 'is-active' if request.endpoint == 'catalog.movies' }}">
+      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M18 3v2h-2V3H8v2H6V3H4v18h2v-2h2v2h8v-2h2v2h2V3zM8 17H6v-2h2zm0-4H6v-2h2zm0-4H6V7h2zm10 8h-2v-2h2zm0-4h-2v-2h2zm0-4h-2V7h2z"/></svg><span>Movies</span>
+    </a>
+    <a href="{{ url_for('lists.my_list') }}" class="{{ 'is-active' if request.endpoint == 'lists.my_list' }}">
+      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z"/></svg><span>My List</span>
+    </a>
+    <a href="{{ url_for('account.index') }}" class="{{ 'is-active' if request.endpoint == 'account.index' }}">
+      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-4.4 0-9 2.2-9 5v3h18v-3c0-2.8-4.6-5-9-5z"/></svg><span>Profile</span>
+    </a>
+  </nav>
+  {% endif %}
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

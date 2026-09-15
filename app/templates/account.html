@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Account - Poloflix{% endblock %}
+
+{% block content %}
+<div class="account-page">
+  <aside class="account-sidebar">
+    <div class="account-sidebar__user">
+      <div class="avatar avatar--lg">{{ current_user.full_name[:1]|upper if current_user.full_name else current_user.username[:2]|upper }}</div>
+      <div>
+        <p class="account-sidebar__name">{{ current_user.full_name }}</p>
+        <p class="account-sidebar__email">{{ current_user.email }}</p>
+      </div>
+    </div>
+    <nav class="account-sidebar__nav">
+      <a class="is-active" href="#">Account</a>
+      <a href="{{ url_for('lists.my_list') }}">My List</a>
+      <a href="#">Playback Settings</a>
+      <a href="#">Parental Controls</a>
+      <a href="#">Help</a>
+      <a href="{{ url_for('auth.logout') }}">Sign Out</a>
+    </nav>
+  </aside>
+
+  <div class="account-main">
+    <section class="account-card">
+      <h2>Account Settings</h2>
+      <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="form_name" value="profile_info">
+        <div class="account-card__grid">
+          <label>Full Name
+            <input type="text" name="full_name" value="{{ current_user.full_name }}" required>
+          </label>
+          <label>Email <span class="muted">(contact support to change)</span>
+            <input type="email" value="{{ current_user.email }}" disabled>
+          </label>
+        </div>
+        <button class="btn btn--primary">Save Changes</button>
+      </form>
+    </section>
+
+    <section class="account-card">
+      <h2>Password</h2>
+      <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="form_name" value="change_password">
+        <div class="account-card__grid">
+          <label>Current Password<input type="password" name="current_password" required></label>
+          <label>New Password<input type="password" name="new_password" required minlength="8"></label>
+          <label>Confirm New Password<input type="password" name="confirm_new_password" required minlength="8"></label>
+        </div>
+        <button class="btn btn--primary">Change Password</button>
+      </form>
+    </section>
+
+    <section class="account-card">
+      <h2>Profile Photo</h2>
+      <form method="post" enctype="multipart/form-data" class="account-card__inline">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="form_name" value="avatar">
+        <div class="avatar avatar--lg">{{ current_user.full_name[:1]|upper if current_user.full_name else "?" }}</div>
+        <input type="file" name="avatar" accept="image/*">
+        <button class="btn btn--dark" type="submit">Change Photo</button>
+      </form>
+    </section>
+
+    <section class="account-card">
+      <h2>Profiles <span class="muted">({{ current_user.profiles|length }}/{{ current_user.subscription.plan.max_profiles if current_user.subscription and current_user.subscription.plan else 1 }})</span></h2>
+      <div class="profiles-grid">
+        {% for p in current_user.profiles %}
+        <div class="profile-chip">
+          <div class="profile-chip__avatar">{{ p.name[:1]|upper }}</div>
+          <span>{{ p.name }}</span>
+          {% if current_user.profiles|length > 1 %}
+          <form method="post" action="{{ url_for('account.delete_profile', profile_id=p.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="profile-chip__remove" title="Remove profile">&times;</button>
+          </form>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      <form method="post" action="{{ url_for('account.add_profile') }}" class="account-card__inline">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="text" name="name" placeholder="Profile name" required>
+        <label class="checkbox"><input type="checkbox" name="is_kids"> Kids profile</label>
+        <button class="btn btn--dark" type="submit">Add Profile</button>
+      </form>
+    </section>
+
+    <section class="account-card">
+      <h2>Subscription</h2>
+      <p class="muted">
+        Current plan: <strong>{{ current_user.plan_code }}</strong>
+        {% if current_user.plan_code == "FREE" %} - upgrade to Premium for 1080p, more profiles and no ads.{% endif %}
+      </p>
+    </section>
+  </div>
+</div>
+{% endblock %}

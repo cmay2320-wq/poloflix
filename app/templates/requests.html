@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Request a Title - Poloflix{% endblock %}
+
+{% block content %}
+<div class="requests-page">
+  <div class="requests-page__intro">
+    <h1>Request a Movie or Show</h1>
+    <p>Can't find what you're looking for? Let us know and we'll try to add it.</p>
+  </div>
+
+  <form method="post" class="request-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="request-form__row">
+      <label>Title
+        <input type="text" name="title" required placeholder="e.g. Dune: Part Three">
+      </label>
+      <label>Type
+        <select name="media_type">
+          <option value="movie">Movie</option>
+          <option value="tv">TV Show</option>
+        </select>
+      </label>
+      <label>Release year
+        <input type="number" name="release_year" min="1900" max="2100" placeholder="2026">
+      </label>
+    </div>
+    <label>IMDb / TMDB link (optional)
+      <input type="url" name="reference_link" placeholder="https://www.imdb.com/title/...">
+    </label>
+    <label>Why do you want it? (optional)
+      <textarea name="reason" rows="3" placeholder="Tell us a bit about it"></textarea>
+    </label>
+    <button class="btn btn--primary" type="submit">Submit Request</button>
+  </form>
+
+  <section class="requests-section">
+    <h2>Your Requests</h2>
+    {% if not my_requests %}
+      <p class="empty-state">You haven't requested anything yet.</p>
+    {% else %}
+    <table class="requests-table">
+      <thead><tr><th>Title</th><th>Type</th><th>Status</th><th>Votes</th></tr></thead>
+      <tbody>
+        {% for r in my_requests %}
+        <tr>
+          <td>{{ r.title }}</td>
+          <td>{{ "TV Show" if r.media_type == "tv" else "Movie" }}</td>
+          <td><span class="status status--{{ r.status|lower }}">{{ r.status }}</span></td>
+          <td>{{ r.vote_count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </section>
+
+  <section class="requests-section">
+    <h2>Community Requests</h2>
+    {% if not community_requests %}
+      <p class="empty-state">No open requests right now - be the first!</p>
+    {% else %}
+    <ul class="request-list">
+      {% for r in community_requests %}
+      <li class="request-list__item">
+        <div>
+          <p class="request-list__title">{{ r.title }} <span class="status status--{{ r.status|lower }}">{{ r.status }}</span></p>
+          <p class="request-list__meta">{{ "TV Show" if r.media_type == "tv" else "Movie" }}{% if r.release_year %} &middot; {{ r.release_year }}{% endif %}</p>
+        </div>
+        <form method="post" action="{{ url_for('requests.vote', request_id=r.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn--dark upvote-btn {{ 'is-active' if r.id in voted_ids }}" type="submit">
+            <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+            {{ r.vote_count }}
+          </button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

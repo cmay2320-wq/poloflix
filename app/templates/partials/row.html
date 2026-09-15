@@ -1,0 +1,20 @@
+{% from "partials/movie_card.html" import card %}
+{% macro row(title, items, see_all_url=None, progress_map=None) %}
+{% if items %}
+<section class="row">
+  <div class="row__head">
+    <h2>{{ title }}</h2>
+    {% if see_all_url %}<a class="row__see-all" href="{{ see_all_url }}">See All &rsaquo;</a>{% endif %}
+  </div>
+  <div class="row__scroller">
+    {% for item in items %}
+      {% if progress_map and item.media is defined %}
+        {{ card(item.media, item.progress, item.sub) }}
+      {% else %}
+        {{ card(item) }}
+      {% endif %}
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endmacro %}

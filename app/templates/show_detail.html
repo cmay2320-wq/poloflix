@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% from "partials/row.html" import row %}
+{% block title %}{{ show.title }} - Poloflix{% endblock %}
+
+{% block content %}
+<div class="detail" style="--backdrop:url('{{ storage.url_for(show.backdrop_key, 'backdrops') if show.backdrop_key else '' }}')">
+  <div class="detail__backdrop"></div>
+  <div class="detail__panel">
+    <div class="detail__poster">
+      {% if show.poster_key %}<img src="{{ storage.url_for(show.poster_key, 'posters') }}" alt="{{ show.title }}">{% endif %}
+    </div>
+    <div class="detail__info">
+      <h1>{{ show.title }}</h1>
+      <div class="detail__meta">
+        <span>{{ show.first_air_year }}</span><span>&middot;</span>
+        {% for g in show.genres %}<span>{{ g.name }}</span>{% if not loop.last %}<span>&middot;</span>{% endif %}{% endfor %}
+        <span>&middot;</span><span>{{ show.season_count }} Season{{ "s" if show.season_count != 1 }}</span>
+      </div>
+      <div class="detail__rating">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="#f5c518" d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+        <strong>{{ "%.1f"|format(show.rating) }}</strong>
+      </div>
+      <p class="detail__desc">{{ show.description }}</p>
+
+      <div class="detail__actions">
+        {% if season and season.episodes %}
+        <a href="{{ url_for('player.watch_episode', episode_id=season.episodes[0].id) if current_user.is_authenticated else url_for('auth.login') }}" class="btn btn--primary btn--lg">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M8 5v14l11-7z"/></svg> Play
+        </a>
+        {% endif %}
+        {% if current_user.is_authenticated %}
+        <button class="btn btn--dark btn--lg watchlist-btn" data-media-type="tv" data-media-id="{{ show.id }}" data-in-list="{{ 'true' if in_list else 'false' }}">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          <span>{{ "In My List" if in_list else "My List" }}</span>
+        </button>
+        {% endif %}
+      </div>
+
+      <div class="detail__facts">
+        {% if show.cast %}<p><span>Cast</span>{{ show.cast }}</p>{% endif %}
+        {% if show.director %}<p><span>Creator</span>{{ show.director }}</p>{% endif %}
+        <p><span>Language</span>{{ show.language }}</p>
+      </div>
+    </div>
+  </div>
+
+  {% if show.seasons %}
+  <section class="episodes">
+    <div class="episodes__head">
+      <h2>Episodes</h2>
+      <select class="season-select" onchange="location.href='?season='+this.value">
+        {% for s in show.seasons %}
+        <option value="{{ s.number }}" {{ "selected" if season and s.number == season.number }}>{{ s.title or ("Season " ~ s.number) }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <ol class="episode-list">
+      {% for ep in season.episodes if season %}
+      <li class="episode-row">
+        <span class="episode-row__num">{{ ep.number }}</span>
+        <div class="episode-row__thumb">
+          {% if ep.thumbnail_key %}<img src="{{ storage.url_for(ep.thumbnail_key, 'posters') }}" alt="">{% endif %}
+          {% if ep.id in watched_episode_ids %}<span class="episode-row__watched">&#10003;</span>{% endif %}
+        </div>
+        <div class="episode-row__info">
+          <p class="episode-row__title">{{ ep.title }}</p>
+          <p class="episode-row__desc">{{ ep.description or "" }}</p>
+        </div>
+        <span class="episode-row__duration">{{ ep.duration_minutes }}m</span>
+        <a class="episode-row__play" href="{{ url_for('player.watch_episode', episode_id=ep.id) if current_user.is_authenticated else url_for('auth.login') }}">
+          <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.5"/><path fill="currentColor" d="M10 8l6 4-6 4z"/></svg>
+        </a>
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+  {% endif %}
+
+  {% if related %}{{ row("More Like This", related) }}{% endif %}
+</div>
+{% endblock %}

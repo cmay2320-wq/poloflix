@@ -1,0 +1,44 @@
+{% extends "admin/base.html" %}
+{% block title %}Dashboard - Poloflix Admin{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block admin_content %}
+<div class="stat-grid">
+  <div class="stat-card"><span>Total Users</span><strong>{{ total_users }}</strong></div>
+  <div class="stat-card"><span>Paid Users</span><strong>{{ paid_users }}</strong></div>
+  <div class="stat-card"><span>Movies</span><strong>{{ total_movies }}</strong></div>
+  <div class="stat-card"><span>TV Shows</span><strong>{{ total_shows }}</strong></div>
+  <div class="stat-card"><span>Open Requests</span><strong>{{ total_requests }}</strong></div>
+  <div class="stat-card"><span>New Users (7d)</span><strong>{{ new_users_7d }}</strong></div>
+</div>
+
+<div class="admin-columns">
+  <section class="admin-panel">
+    <h2>Recent Users</h2>
+    <table class="admin-table">
+      <thead><tr><th>Name</th><th>Username</th><th>Joined</th></tr></thead>
+      <tbody>
+        {% for u in recent_users %}
+        <tr><td>{{ u.full_name }}</td><td>@{{ u.username }}</td><td>{{ u.created_at.strftime("%b %d, %Y") }}</td></tr>
+        {% else %}
+        <tr><td colspan="3" class="muted">No users yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="admin-panel">
+    <h2>Recent Requests</h2>
+    <table class="admin-table">
+      <thead><tr><th>Title</th><th>Status</th><th>Votes</th></tr></thead>
+      <tbody>
+        {% for r in recent_requests %}
+        <tr><td>{{ r.title }}</td><td><span class="status status--{{ r.status|lower }}">{{ r.status }}</span></td><td>{{ r.vote_count }}</td></tr>
+        {% else %}
+        <tr><td colspan="3" class="muted">No requests yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</div>
+{% endblock %}

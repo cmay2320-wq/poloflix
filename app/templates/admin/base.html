@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Admin - Poloflix{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body class="admin">
+  <div class="admin-shell">
+    <aside class="admin-sidebar">
+      <a class="brand" href="{{ url_for('admin.dashboard') }}">
+        <svg class="brand__mark" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#1f6feb"/><path d="M12 9l12 7-12 7z" fill="white"/></svg>
+        <span>Poloflix Admin</span>
+      </a>
+      <nav>
+        <a href="{{ url_for('admin.dashboard') }}" class="{{ 'is-active' if request.endpoint == 'admin.dashboard' }}">Dashboard</a>
+        <a href="{{ url_for('admin.movies') }}" class="{{ 'is-active' if request.endpoint and request.endpoint.startswith('admin.movie') }}">Movies</a>
+        <a href="{{ url_for('admin.shows') }}" class="{{ 'is-active' if request.endpoint and request.endpoint.startswith('admin.show') or request.endpoint == 'admin.season_add' }}">TV Shows</a>
+        <a href="{{ url_for('admin.requests_view') }}" class="{{ 'is-active' if request.endpoint and request.endpoint.startswith('admin.request') }}">Requests</a>
+        <a href="{{ url_for('admin.users') }}" class="{{ 'is-active' if request.endpoint and request.endpoint.startswith('admin.user') or request.endpoint == 'admin.toggle_suspend' }}">Users</a>
+        <a href="#">Subscriptions</a>
+        <a href="#">Analytics</a>
+        <a href="#">Settings</a>
+      </nav>
+      <a class="admin-sidebar__exit" href="{{ url_for('home.index') }}">&larr; Back to site</a>
+    </aside>
+
+    <div class="admin-main">
+      <header class="admin-topbar">
+        <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+        <div class="admin-topbar__profile">
+          <span>{{ current_user.full_name }}</span>
+          <div class="avatar">{{ current_user.full_name[:1]|upper }}</div>
+        </div>
+      </header>
+
+      <div class="toast-stack" id="toastStack">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% for category, message in messages %}
+            <div class="toast toast--{{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endwith %}
+      </div>
+
+      <main class="admin-content">
+        {% block admin_content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

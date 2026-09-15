@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from "partials/row.html" import row %}
+{% block title %}{{ title }} - Poloflix{% endblock %}
+
+{% block content %}
+<div class="browse">
+  <h1 class="browse__title">Browse</h1>
+
+  <div class="pills">
+    <a class="pill {{ 'is-active' if not active_genre }}" href="{{ url_for('catalog.movies' if kind == 'movies' else 'catalog.shows') }}">All</a>
+    {% for g in genres %}
+      <a class="pill {{ 'is-active' if active_genre == g.slug }}" href="{{ url_for('catalog.movies' if kind == 'movies' else 'catalog.shows', genre=g.slug) }}">{{ g.name }}</a>
+    {% endfor %}
+  </div>
+
+  {% if active_genre %}
+    {% set active = genres|selectattr('slug', 'equalto', active_genre)|first %}
+    {{ row(active.name if active else title, items) }}
+  {% else %}
+    {% for g, items_in_genre in by_genre %}
+      {{ row(g.name, items_in_genre, url_for(('catalog.movies' if kind == 'movies' else 'catalog.shows'), genre=g.slug)) }}
+    {% endfor %}
+    {% if not by_genre %}
+      {{ row(title, items) }}
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

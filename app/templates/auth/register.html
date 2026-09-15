@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Join Poloflix{% endblock %}
+{% block body_class %}is-auth{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <form method="post" class="auth-card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <h1>Create Your Account</h1>
+    <label>Full Name<input type="text" name="full_name" value="{{ form.get('full_name','') }}" required autofocus></label>
+    <label>Username<input type="text" name="username" value="{{ form.get('username','') }}" required></label>
+    <label>Email<input type="email" name="email" value="{{ form.get('email','') }}" required></label>
+    <label>Password<input type="password" name="password" required minlength="8"></label>
+    <label>Confirm Password<input type="password" name="confirm_password" required minlength="8"></label>
+    <label class="checkbox"><input type="checkbox" name="terms" required> I agree to the Terms of Service</label>
+    <button class="btn btn--primary btn--block" type="submit">Create Account</button>
+    <p class="auth-card__footer">Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a></p>
+  </form>
+</div>
+{% endblock %}

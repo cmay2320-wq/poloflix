@@ -1,0 +1,33 @@
+{% extends "admin/base.html" %}
+{% block title %}TV Shows - Poloflix Admin{% endblock %}
+{% block page_title %}TV Shows{% endblock %}
+
+{% block admin_content %}
+<div class="admin-toolbar">
+  <a class="btn btn--primary" href="{{ url_for('admin.show_new') }}">+ Add TV Show</a>
+</div>
+<section class="admin-panel">
+  <table class="admin-table">
+    <thead><tr><th>Poster</th><th>Title</th><th>Seasons</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for s in shows %}
+      <tr>
+        <td><div class="admin-thumb">{% if s.poster_key %}<img src="{{ storage.url_for(s.poster_key, 'posters') }}" alt=""> {% endif %}</div></td>
+        <td>{{ s.title }}</td>
+        <td>{{ s.season_count }}</td>
+        <td><span class="status status--{{ s.status|lower }}">{{ s.status }}</span></td>
+        <td class="admin-table__actions">
+          <a href="{{ url_for('admin.show_edit', show_id=s.id) }}">Edit</a>
+          <form method="post" action="{{ url_for('admin.show_delete', show_id=s.id) }}" onsubmit="return confirm('Delete {{ s.title }}?');">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="muted">No shows yet - add your first one.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

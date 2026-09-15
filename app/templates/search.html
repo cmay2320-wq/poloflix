@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from "partials/movie_card.html" import card %}
+{% block title %}Search - Poloflix{% endblock %}
+
+{% block content %}
+<div class="search-page">
+  <h1>Search Results {% if q %}<span class="search-page__q">for "{{ q }}"</span>{% endif %}</h1>
+
+  <div class="pills">
+    <a class="pill {{ 'is-active' if media_filter == 'all' }}" href="?q={{ q }}&type=all">All</a>
+    <a class="pill {{ 'is-active' if media_filter == 'movies' }}" href="?q={{ q }}&type=movies">Movies</a>
+    <a class="pill {{ 'is-active' if media_filter == 'tv' }}" href="?q={{ q }}&type=tv">TV Shows</a>
+  </div>
+
+  {% if not q %}
+    <p class="empty-state">Start typing above to search movies, shows, actors, and directors.</p>
+  {% elif not movies and not shows %}
+    <p class="empty-state">No results for "{{ q }}". Try another title, or <a href="{{ url_for('requests.index') }}">request it</a>.</p>
+  {% else %}
+    <div class="grid">
+      {% for m in movies %}{{ card(m) }}{% endfor %}
+      {% for s in shows %}{{ card(s) }}{% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

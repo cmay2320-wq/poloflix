@@ -1,0 +1,19 @@
+{% macro card(media, progress=None, sub_label=None) %}
+{% set href = url_for('catalog.movie_detail', slug=media.slug) if media.media_type == 'movie' else url_for('catalog.show_detail', slug=media.slug) %}
+<a class="card" href="{{ href }}">
+  <div class="card__poster">
+    {% if media.poster_key %}
+      <img src="{{ storage.url_for(media.poster_key, 'posters') }}" alt="{{ media.title }}" loading="lazy">
+    {% else %}
+      <div class="card__poster-fallback">{{ media.title }}</div>
+    {% endif %}
+    {% if progress %}
+      <div class="card__progress"><span style="width:{{ progress.percent }}%"></span></div>
+    {% endif %}
+  </div>
+  <div class="card__meta">
+    <p class="card__title">{{ media.title }}</p>
+    {% if sub_label %}<p class="card__sub">{{ sub_label }}</p>{% endif %}
+  </div>
+</a>
+{% endmacro %}

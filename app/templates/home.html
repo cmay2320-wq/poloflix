@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% from "partials/row.html" import row %}
+{% block title %}Poloflix - Home{% endblock %}
+
+{% block content %}
+{% if featured %}
+<section class="hero" id="hero" data-count="{{ featured|length }}">
+  {% for m in featured %}
+  <div class="hero__slide {{ 'is-active' if loop.first }}" data-index="{{ loop.index0 }}"
+       style="background-image:linear-gradient(180deg, rgba(6,9,15,.15) 0%, rgba(6,9,15,.55) 55%, #06090f 100%), url('{{ storage.url_for(m.backdrop_key, 'backdrops') if m.backdrop_key else storage.url_for(m.poster_key, 'posters') }}')">
+    <div class="hero__content">
+      <p class="hero__eyebrow">Trending Now</p>
+      <h1 class="hero__title">{{ m.title }}</h1>
+      <p class="hero__desc">{{ m.description or "" }}</p>
+      <div class="hero__meta">
+        <span>{{ m.release_year }}</span><span>&middot;</span>
+        <span>{{ m.genres[0].name if m.genres else "Featured" }}</span><span>&middot;</span>
+        <span>{{ m.runtime_minutes ~ " min" if m.runtime_minutes else "" }}</span>
+      </div>
+      <div class="hero__actions">
+        <a href="{{ url_for('player.watch_movie', slug=m.slug) if current_user.is_authenticated else url_for('auth.login') }}" class="btn btn--primary btn--lg">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M8 5v14l11-7z"/></svg> Play
+        </a>
+        <button class="btn btn--dark btn--lg watchlist-btn" data-media-type="movie" data-media-id="{{ m.id }}">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg> My List
+        </button>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  {% if featured|length > 1 %}
+  <div class="hero__dots">
+    {% for m in featured %}<button class="hero__dot {{ 'is-active' if loop.first }}" data-index="{{ loop.index0 }}"></button>{% endfor %}
+  </div>
+  {% endif %}
+</section>
+{% endif %}
+
+<div class="rows">
+  {{ row("Trending Now", trending, url_for('catalog.movies')) }}
+
+  {% if continue_watching %}
+  <section class="row">
+    <div class="row__head"><h2>Continue Watching</h2></div>
+    <div class="row__scroller">
+      {% from "partials/movie_card.html" import card %}
+      {% for cw in continue_watching %}
+        {{ card(cw.media, cw.progress, cw.sub) }}
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {{ row("Popular Movies", popular_movies, url_for('catalog.movies')) }}
+  {{ row("Popular TV Shows", popular_shows, url_for('catalog.shows')) }}
+  {{ row("Recently Added", recent, url_for('catalog.movies')) }}
+
+  {% for genre_name, items in genre_rows %}
+    {{ row(genre_name, items) }}
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}<script src="{{ url_for('static', filename='js/home.js') }}"></script>{% endblock %}

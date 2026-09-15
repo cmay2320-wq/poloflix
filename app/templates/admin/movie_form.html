@@ -1,0 +1,75 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ "Edit" if movie else "Add" }} Movie - Poloflix Admin{% endblock %}
+{% block page_title %}{{ "Edit Movie" if movie else "Add Movie" }}{% endblock %}
+
+{% block admin_content %}
+<form method="post" enctype="multipart/form-data" class="admin-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <section class="admin-panel">
+    <h2>Movie Information</h2>
+    <div class="admin-form__grid">
+      <label>Title<input type="text" name="title" value="{{ movie.title if movie }}" required></label>
+      <label>Release Year<input type="number" name="release_year" value="{{ movie.release_year if movie }}"></label>
+      <label>Runtime (minutes)<input type="number" name="runtime_minutes" value="{{ movie.runtime_minutes if movie }}"></label>
+      <label>Age Rating
+        <select name="age_rating">
+          {% for r in ["G","PG","PG-13","R","NC-17"] %}
+          <option value="{{ r }}" {{ "selected" if movie and movie.age_rating == r }}>{{ r }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Language<input type="text" name="language" value="{{ movie.language if movie else 'English' }}"></label>
+      <label>Country<input type="text" name="country" value="{{ movie.country if movie }}"></label>
+      <label>Director<input type="text" name="director" value="{{ movie.director if movie }}"></label>
+      <label>Cast <span class="muted">(comma separated)</span><input type="text" name="cast" value="{{ movie.cast if movie }}"></label>
+    </div>
+    <label>Description<textarea name="description" rows="4">{{ movie.description if movie }}</textarea></label>
+  </section>
+
+  <section class="admin-panel">
+    <h2>Genres</h2>
+    <div class="checkbox-grid">
+      {% for g in genres %}
+      <label class="checkbox">
+        <input type="checkbox" name="genres" value="{{ g.id }}" {{ "checked" if movie and g in movie.genres }}> {{ g.name }}
+      </label>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="admin-panel">
+    <h2>Media</h2>
+    <div class="admin-form__grid">
+      <label>Poster {% if movie and movie.poster_key %}<span class="muted">(uploaded)</span>{% endif %}<input type="file" name="poster" accept="image/*"></label>
+      <label>Backdrop {% if movie and movie.backdrop_key %}<span class="muted">(uploaded)</span>{% endif %}<input type="file" name="backdrop" accept="image/*"></label>
+      <label>Trailer {% if movie and movie.trailer_key %}<span class="muted">(uploaded)</span>{% endif %}<input type="file" name="trailer" accept="video/*"></label>
+      <label>Video file {% if movie and movie.video_key %}<span class="muted">(uploaded)</span>{% endif %}<input type="file" name="video" accept="video/*"></label>
+      <label>Subtitles (.vtt/.srt) {% if movie and movie.subtitle_key %}<span class="muted">(uploaded)</span>{% endif %}<input type="file" name="subtitle" accept=".vtt,.srt"></label>
+    </div>
+    <p class="muted admin-hint">
+      Files upload to {{ "local disk (instance/media)" }} today. Once Azure Blob Storage is configured
+      (STORAGE_BACKEND=azure), the same form uploads straight to Blob Storage instead - no changes needed here.
+    </p>
+  </section>
+
+  <section class="admin-panel">
+    <h2>Publish Settings</h2>
+    <div class="admin-form__grid">
+      <label>Status
+        <select name="status">
+          {% for s in ["DRAFT","PROCESSING","PUBLISHED","ARCHIVED"] %}
+          <option value="{{ s }}" {{ "selected" if movie and movie.status == s }}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="checkbox"><input type="checkbox" name="is_featured" {{ "checked" if movie and movie.is_featured }}> Feature on homepage</label>
+      <label class="checkbox"><input type="checkbox" name="is_trending" {{ "checked" if movie and movie.is_trending }}> Mark as trending</label>
+    </div>
+  </section>
+
+  <div class="admin-form__actions">
+    <a class="btn btn--dark" href="{{ url_for('admin.movies') }}">Cancel</a>
+    <button class="btn btn--primary" type="submit">{{ "Save Changes" if movie else "Create Movie" }}</button>
+  </div>
+</form>
+{% endblock %}

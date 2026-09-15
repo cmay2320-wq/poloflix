@@ -1,0 +1,35 @@
+{% extends "admin/base.html" %}
+{% block title %}Movies - Poloflix Admin{% endblock %}
+{% block page_title %}Movies{% endblock %}
+
+{% block admin_content %}
+<div class="admin-toolbar">
+  <a class="btn btn--primary" href="{{ url_for('admin.movie_new') }}">+ Add Movie</a>
+</div>
+<section class="admin-panel">
+  <table class="admin-table">
+    <thead><tr><th>Poster</th><th>Title</th><th>Year</th><th>Status</th><th>Featured</th><th>Trending</th><th></th></tr></thead>
+    <tbody>
+      {% for m in movies %}
+      <tr>
+        <td><div class="admin-thumb">{% if m.poster_key %}<img src="{{ storage.url_for(m.poster_key, 'posters') }}" alt=""> {% endif %}</div></td>
+        <td>{{ m.title }}</td>
+        <td>{{ m.release_year }}</td>
+        <td><span class="status status--{{ m.status|lower }}">{{ m.status }}</span></td>
+        <td>{{ "Yes" if m.is_featured else "-" }}</td>
+        <td>{{ "Yes" if m.is_trending else "-" }}</td>
+        <td class="admin-table__actions">
+          <a href="{{ url_for('admin.movie_edit', movie_id=m.id) }}">Edit</a>
+          <form method="post" action="{{ url_for('admin.movie_delete', movie_id=m.id) }}" onsubmit="return confirm('Delete {{ m.title }}?');">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="muted">No movies yet - add your first one.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

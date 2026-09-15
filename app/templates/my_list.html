@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% from "partials/movie_card.html" import card %}
+{% block title %}My List - Poloflix{% endblock %}
+
+{% block content %}
+<div class="search-page">
+  <h1>My List</h1>
+  {% if not items %}
+    <p class="empty-state">Nothing here yet. Tap "My List" on any title to save it for later.</p>
+  {% else %}
+    <div class="grid">
+      {% for item in items %}{{ card(item.media) }}{% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "admin/base.html" %}
+{% block title %}Users - Poloflix Admin{% endblock %}
+{% block page_title %}Users{% endblock %}
+
+{% block admin_content %}
+<form class="admin-toolbar" method="get">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search by name, username, or email" class="admin-search">
+  <button class="btn btn--dark" type="submit">Search</button>
+</form>
+
+<section class="admin-panel">
+  <table class="admin-table">
+    <thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Plan</th><th>Joined</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u.full_name }}</td>
+        <td>@{{ u.username }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.plan_code }}</td>
+        <td>{{ u.created_at.strftime("%b %d, %Y") }}</td>
+        <td><span class="status status--{{ 'declined' if u.is_suspended else 'added' }}">{{ "Suspended" if u.is_suspended else "Active" }}</span></td>
+        <td class="admin-table__actions">
+          {% if u.id != current_user.id %}
+          <form method="post" action="{{ url_for('admin.toggle_suspend', user_id=u.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit">{{ "Unsuspend" if u.is_suspended else "Suspend" }}</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="muted">No users found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
