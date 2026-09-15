@@ -13,4 +13,4 @@ psycopg2-binary==2.9.9        # PostgreSQL
 
 # --- Add when you enable Azure Blob Storage (see README "Adding Azure Blob Storage") ---
 azure-storage-blob==12.22.0
-gunicorn==23.0.0
+gunicorn
